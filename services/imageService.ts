@@ -8,7 +8,6 @@ const saveToTempFile = async (url: string): Promise<string> => {
   const fileUri = FileSystem.cacheDirectory + filename;
 
   try {
-    // Base64 image
     if (url.includes("base64")) {
       const base64 = url.split(",")[1];
 
@@ -19,7 +18,6 @@ const saveToTempFile = async (url: string): Promise<string> => {
       return fileUri;
     }
 
-    // Normal image URL
     const result = await FileSystem.downloadAsync(url, fileUri);
 
     if (result.status !== 200) {
@@ -61,8 +59,6 @@ export const downloadImage = async (url: string) => {
       text1: "Success 🎉",
       text2: "Image saved successfully!",
     });
-
-    // alert("✅ Image saved to gallery!");
   } catch (error: any) {
     console.log("Download error:", error);
     alert(error.message || "Failed to save image");

@@ -91,14 +91,12 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>🎨 Clipart Pro</Text>
         <Text style={styles.headerSub}>AI-powered clipart generator</Text>
       </View>
 
       <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
-        {/* Upload Section */}
         <Text style={styles.sectionTitle}>Upload Image</Text>
         <View style={styles.uploadRow}>
           <TouchableOpacity style={styles.uploadBtn} onPress={pickImage}>
@@ -154,7 +152,6 @@ export default function HomeScreen() {
           ))}
         </View>
 
-        {/* Generate Button */}
         <TouchableOpacity
           style={[
             styles.generateBtn,
@@ -175,7 +172,6 @@ export default function HomeScreen() {
           )}
         </TouchableOpacity>
 
-        {/* Results */}
         {generatedImages.length > 0 && (
           <>
             <Text style={styles.sectionTitle}>Generated Cliparts</Text>
