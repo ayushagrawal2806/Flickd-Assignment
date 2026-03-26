@@ -1,4 +1,3 @@
-/* eslint-disable import/no-unresolved */
 import GeneratedImageCard from "@/components/GeneratedImageCard";
 import { STYLES } from "@/constants/styles";
 import { useClipartGenerator } from "@/hooks/useClipartGenerator";
@@ -15,6 +14,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Toast from "react-native-toast-message";
 
 export default function HomeScreen() {
   const [image, setImage] = useState<string | null>(null);
@@ -26,7 +26,7 @@ export default function HomeScreen() {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images"],
       allowsEditing: true,
-      quality: 1,
+      quality: 0.6,
     });
     if (!result.canceled) {
       setImage(result.assets[0].uri);
@@ -36,10 +36,16 @@ export default function HomeScreen() {
 
   const takePhoto = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
+
     if (status !== "granted") {
-      alert("Camera permission required");
+      Toast.show({
+        type: "error",
+        text1: "Permission required",
+        text2: "Camera permission is needed to take photos",
+      });
       return;
     }
+
     const result = await ImagePicker.launchCameraAsync({
       allowsEditing: true,
       quality: 1,
@@ -58,13 +64,28 @@ export default function HomeScreen() {
 
   const handleGenerate = () => {
     if (!image) {
-      alert("Please upload an image first");
+      Toast.show({
+        type: "error",
+        text1: "No Image",
+        text2: "Please upload an image first",
+      });
       return;
     }
+
     if (selectedStyles.length === 0) {
-      alert("Please select at least one style");
+      Toast.show({
+        type: "error",
+        text1: "No Style Selected",
+        text2: "Please select at least one style",
+      });
       return;
     }
+
+    Toast.show({
+      type: "info",
+      text1: "Generating clipart",
+      text2: "Creating your styles...",
+    });
     generate(image, selectedStyles);
   };
 
@@ -105,7 +126,6 @@ export default function HomeScreen() {
           </View>
         )}
 
-        {/* Style Selection */}
         <Text style={styles.sectionTitle}>Choose Styles</Text>
         <Text style={styles.sectionHint}>
           Select multiple for batch generation

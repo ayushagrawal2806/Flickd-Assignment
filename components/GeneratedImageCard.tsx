@@ -19,7 +19,6 @@ export default function GeneratedImageCard({ item }: Props) {
 
   return (
     <View style={styles.card}>
-      {/* ✅ Works with both base64 and URLs */}
       <Image
         source={{ uri: item.url }}
         style={styles.image}

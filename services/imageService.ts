@@ -1,42 +1,44 @@
 import * as FileSystem from "expo-file-system/legacy";
 import * as MediaLibrary from "expo-media-library";
 import * as Sharing from "expo-sharing";
+import Toast from "react-native-toast-message";
 
 const saveToTempFile = async (url: string): Promise<string> => {
   const filename = `clipart_${Date.now()}.png`;
   const fileUri = FileSystem.cacheDirectory + filename;
 
-  // Case 1: base64 image
-  if (url.startsWith("data:image")) {
-    const base64 = url.split(",")[1];
+  try {
+    // Base64 image
+    if (url.includes("base64")) {
+      const base64 = url.split(",")[1];
 
-    await FileSystem.writeAsStringAsync(fileUri, base64, {
-      encoding: FileSystem.EncodingType.Base64,
-    });
+      await FileSystem.writeAsStringAsync(fileUri, base64, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
 
-    return fileUri;
+      return fileUri;
+    }
+
+    // Normal image URL
+    const result = await FileSystem.downloadAsync(url, fileUri);
+
+    if (result.status !== 200) {
+      throw new Error("Image download failed");
+    }
+
+    return result.uri;
+  } catch (error) {
+    console.log("Temp file error:", error);
+    throw error;
   }
-
-  // Case 2: normal image URL
-  const result = await FileSystem.downloadAsync(url, fileUri);
-
-  if (result.status !== 200) {
-    throw new Error("Failed to download image");
-  }
-
-  return result.uri;
 };
-
-/* -------------------------- */
-/* Save Image */
-/* -------------------------- */
 
 export const downloadImage = async (url: string) => {
   try {
-    const { status } = await MediaLibrary.requestPermissionsAsync();
+    const permission = await MediaLibrary.requestPermissionsAsync();
 
-    if (status !== "granted") {
-      alert("Permission required");
+    if (!permission.granted) {
+      alert("Permission required to save image");
       return;
     }
 
@@ -44,30 +46,43 @@ export const downloadImage = async (url: string) => {
 
     const asset = await MediaLibrary.createAssetAsync(fileUri);
 
-    await MediaLibrary.createAlbumAsync("AI Clipart", asset, false);
+    const albumName = "AI Clipart";
 
-    alert("✅ Saved to gallery!");
+    const album = await MediaLibrary.getAlbumAsync(albumName);
+
+    if (album == null) {
+      await MediaLibrary.createAlbumAsync(albumName, asset, false);
+    } else {
+      await MediaLibrary.addAssetsToAlbumAsync([asset], album, false);
+    }
+
+    Toast.show({
+      type: "success",
+      text1: "Success 🎉",
+      text2: "Image saved successfully!",
+    });
+
+    // alert("✅ Image saved to gallery!");
   } catch (error: any) {
     console.log("Download error:", error);
-    alert(error.message);
+    alert(error.message || "Failed to save image");
   }
 };
 
-/* -------------------------- */
-/* Share Image */
-/* -------------------------- */
-
 export const shareImage = async (url: string) => {
   try {
-    const fileUri = await saveToTempFile(url);
+    const available = await Sharing.isAvailableAsync();
 
-    if (!(await Sharing.isAvailableAsync())) {
-      alert("Sharing not available");
+    if (!available) {
+      alert("Sharing is not available on this device");
       return;
     }
 
+    const fileUri = await saveToTempFile(url);
+
     await Sharing.shareAsync(fileUri);
-  } catch (error: any) {
+  } catch (error) {
     console.log("Share error:", error);
+    alert("Failed to share image");
   }
 };

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { STYLES } from "../constants/styles";
-import { generateClipartUrl } from "../services/pollinationsService";
+import { generateClipartUrl } from "../services/huggingFaceService";
 
 export type GeneratedImage = {
   styleId: string;
@@ -19,7 +19,6 @@ export const useClipartGenerator = () => {
     try {
       setIsGenerating(true);
 
-      // Show skeletons immediately
       const skeletons: GeneratedImage[] = selectedStyleIds.map((id) => {
         const style = STYLES.find((s) => s.id === id)!;
         return {
@@ -37,7 +36,6 @@ export const useClipartGenerator = () => {
         selectedStyleIds.includes(s.id),
       );
 
-      // ✅ Generate all styles in parallel
       const results = await Promise.allSettled(
         selectedStyles.map(async (style) => {
           const url = await generateClipartUrl(

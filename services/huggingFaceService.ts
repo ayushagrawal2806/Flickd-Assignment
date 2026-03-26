@@ -7,7 +7,6 @@ export const generateClipartUrl = async (
     Constants.expoConfig?.extra?.hfToken ?? process.env.EXPO_PUBLIC_HF_TOKEN;
   const prompt = `${stylePrompt}, ${description}`;
 
-  // ✅ Updated URL: router.huggingface.co
   const res = await fetch(
     "https://router.huggingface.co/hf-inference/models/stabilityai/stable-diffusion-xl-base-1.0",
     {
@@ -34,7 +33,6 @@ export const generateClipartUrl = async (
     throw new Error("Image generation failed");
   }
 
-  // ✅ Convert binary response to base64
   const blob = await res.blob();
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
